@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import ReactMarkdown from 'react-markdown';
+import loading from "./assets/loading.gif"
 
 const App = () => {
 
@@ -7,9 +8,9 @@ const App = () => {
     prompt: ""
   });
 
-  const [resData, setResData] = useState("")
+  const [isLoading, setIsLoading] = useState(false);
 
-  const [res, setRes] = useState("hidden");
+  const [resData, setResData] = useState([]);
 
   const handleChange = (e) => {
     setChat({
@@ -19,6 +20,13 @@ const App = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // Clear the input after submission
+    setChat({ prompt: "" });
+
+    // Display user input in the chat window
+    setResData(prevRes => [...prevRes, { type: 'user', content: chat.prompt }]);
+    setIsLoading(true);
     try {
       const response = await fetch("http://localhost:3000/api/v1/chat", {
         method: "POST",
@@ -28,51 +36,56 @@ const App = () => {
         body: JSON.stringify(chat),
       });
       const data = await response.json();
-      setRes("block");
-      setResData(data);
+      setResData(prevRes => [...prevRes, { type: 'response', content: data }]);
+      setIsLoading(false);
     } catch (error) {
-      console.log("Faild to get response!!", error);
-
+      console.log("Failed to get response!!", error);
     }
   }
 
   return (
-    <div class="max-w-md mx-auto my-40 bg-white dark:bg-zinc-800 shadow-2xl border border-zinc-200 rounded-lg overflow-hidden">
-      <div class="flex flex-col h-[400px]">
-        <div class="px-4 py-3 border-b dark:border-zinc-700">
-          <div class="flex justify-between items-center">
-            <h2 class="text-lg font-semibold text-zinc-800 dark:text-white">
+    <div className="max-w-md mx-auto my-40 bg-white dark:bg-zinc-800 shadow-2xl border border-zinc-200 rounded-lg overflow-hidden">
+      <div className="flex flex-col h-[400px]">
+        <div className="px-4 py-3 border-b dark:border-zinc-700">
+          <div className="flex justify-between items-center">
+            <h2 className="text-lg font-semibold text-zinc-800 dark:text-white">
               VerbiGenie
             </h2>
-            <div class="bg-green-500 text-white text-xs px-2 py-1 rounded-full">
+            <div className="bg-green-500 text-white text-xs px-2 py-1 rounded-full">
               Online
             </div>
           </div>
         </div>
         <div
-          class="flex-1 p-3 overflow-y-auto flex flex-col space-y-2"
+          className="flex-1 p-3 overflow-y-auto flex flex-col space-y-2"
           id="chatDisplay">
-          <div class="chat-message self-end bg-blue-500 text-white max-w-xs rounded-lg px-3 py-1.5 text-sm">
+          <div className="chat-message self-end bg-blue-500 text-white max-w-xs rounded-lg px-3 py-1.5 text-sm">
             Hello! How can I assist you today?
           </div>
-          <div class={`chat-message ${res} self-end bg-blue-500 text-white max-w-xs rounded-lg px-3 py-1.5 text-sm`}><ReactMarkdown>{resData}</ReactMarkdown></div>
+
+          {resData.map((resData, index) => (
+            <div key={index} className={`chat-message self-${resData.type === 'user' ? 'start bg-gray-300 text-black w-max' : 'end bg-blue-500 text-white'} max-w-xs rounded-lg px-3 py-1.5 text-sm`}>
+              <ReactMarkdown>{resData.content}</ReactMarkdown>
+            </div>
+          ))}
+
         </div>
-        <div class="px-3 py-2 border-t dark:border-zinc-700">
+        <div className="px-3 py-2 border-t dark:border-zinc-700">
           <form onSubmit={handleSubmit}>
-            <div class="flex gap-2">
+            <div className="flex gap-2">
               <input
                 name="prompt"
                 value={chat.prompt}
                 onChange={handleChange}
                 placeholder="Type your message..."
-                class="flex-1 p-2 border rounded-lg dark:bg-zinc-700 dark:text-white dark:border-zinc-600 text-sm"
+                className="flex-1 p-2 border rounded-lg dark:bg-zinc-700 dark:text-white dark:border-zinc-600 text-sm"
                 id="chatInput"
                 type="text" />
               <button
                 type="submit"
-                class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1.5 px-3 rounded-lg transition duration-300 ease-in-out text-sm"
+                className="bg-blue-500 flex justify-center items-center hover:bg-blue-700 text-white w-[5rem] h-[2.5rem] font-bold py-1.5 px-3 rounded-lg transition duration-300 ease-in-out text-sm"
                 id="sendButton">
-                Send
+                {isLoading ? (<span><img className="w-[32px] brightness-200" src={loading}/></span>) : "Send"}
               </button>
             </div>
           </form>

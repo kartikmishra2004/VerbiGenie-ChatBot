@@ -15,7 +15,7 @@ app.post("/api/v1/chat", async (req, res) => {
 
         async function run() {
             const { prompt } = req.body;
-            const result = await model.generateContent(prompt);
+            const result = await model.generateContent(`"${prompt}`);
             const response = await result.response;
             const text = await response.text();
             res.status(200).json(text);
