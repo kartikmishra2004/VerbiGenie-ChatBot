@@ -44,7 +44,7 @@ const App = () => {
   }
 
   return (
-    <div className="max-w-md mx-auto my-40 bg-white dark:bg-zinc-800 shadow-2xl border border-zinc-200 rounded-lg overflow-hidden">
+    <div className="max-w-md mx-auto mt-20 bg-white dark:bg-zinc-800 shadow-2xl border border-zinc-200 rounded-lg overflow-hidden">
       <div className="flex flex-col h-[400px]">
         <div className="px-4 py-3 border-b dark:border-zinc-700">
           <div className="flex justify-between items-center">
